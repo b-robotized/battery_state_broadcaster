@@ -1,0 +1,99 @@
+# Copyright (c) 20224 Stogl Robotics Consulting UG (haftungsbeschränkt)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Source of this file are templates in
+# [RosTeamWorkspace](https://github.com/StoglRobotics/ros_team_workspace) repository.
+#
+
+battery_state_broadcaster:
+  state_joints: {
+    type: string_array,
+    default_value: [],
+    description: "Specifies joints for reading states. This parameter is only relevant when state joints are different then command joint, i.e., when a following controller is used.",
+    read_only: true,
+    validation: {
+      unique<>: null,
+    }
+  }
+  interfaces:
+    __map_state_joints:
+      battery_voltage: {
+        type: bool,
+        default_value: false,
+        description: "battery_voltage"
+      }
+      battery_current: {
+        type: bool,
+        default_value: false,
+        description: "battery_current"
+      }
+      battery_charge: {
+        type: bool,
+        default_value: false,
+        description: "battery_charge"
+      }
+      battery_percentage: {
+        type: bool,
+        default_value: false,
+        description: "battery_percentage"
+      }
+      battery_power_supply_status: {
+        type: bool,
+        default_value: false,
+        description: "battery_power_supply_status"
+      }
+      battery_power_supply_health: {
+        type: bool,
+        default_value: false,
+        description: "battery_power_supply_health"
+      }
+      battery_present: {
+        type: bool,
+        default_value: false,
+        description: "battery_present"
+      }
+  capacity: {
+    type: double,
+    default_value: 0.0,
+    description: "(optional) Specifies battery capacity in Ah. If not specified, the capacity is not published.",
+    read_only: true,
+  }
+  design_capacity: {
+    type: double,
+    default_value: 0.0,
+    description: "(optional) Specifies battery design capacity in Ah. If not specified, the design capacity is not published.",
+    read_only: true,
+  }
+  power_supply_technology: {
+    type: int,
+    default_value: 1,
+    description: "(optional) Specifies battery power supply technology. If not specified, the power supply technology is not published.",
+    read_only: true,
+    validation: {
+      bounds<>: [0, 6]
+    }
+  }
+  location: {
+    type: string,
+    default_value: "dummy_location",
+    description: "Specifies battery location in combined battery state message.",
+    read_only: true,
+  }
+  serial_number: {
+    type: string,
+    default_value: "dummy_serial_number",
+    description: "(optional) Specifies battery serial number. If not specified, the serial number is not published.",
+    read_only: true,
+  }
