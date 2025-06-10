@@ -122,22 +122,18 @@ BatteryStateBroadcaster::state_interface_configuration() const
     if (interfaces.battery_voltage)
     {
       state_interfaces_config.names.push_back(state_joints_[i] + "/battery_voltage");
-      voltage_cnt++;
     }
     if (interfaces.battery_current)
     {
       state_interfaces_config.names.push_back(state_joints_[i] + "/battery_current");
-      current_cnt++;
     }
     if (interfaces.battery_charge)
     {
       state_interfaces_config.names.push_back(state_joints_[i] + "/battery_charge");
-      charge_cnt++;
     }
     if (interfaces.battery_percentage)
     {
       state_interfaces_config.names.push_back(state_joints_[i] + "/battery_percentage");
-      percentage_cnt++;
     }
     if (interfaces.battery_power_supply_status)
     {
@@ -170,6 +166,31 @@ controller_interface::CallbackReturn BatteryStateBroadcaster::on_activate(
   // get parameters from the listener in case they were updated
   params_ = param_listener_->get_params();
   battery_states_data_.resize(state_joints_.size());
+
+  for (size_t i = 0; i < state_joints_.size(); ++i)
+  {
+    const auto & interfaces = params_.interfaces.state_joints_map.at(params_.state_joints.at(i));
+    if (interfaces.battery_voltage)
+    {
+      voltage_cnt++;
+    }
+    if (interfaces.battery_current)
+    {
+      current_cnt++;
+    }
+    if (interfaces.battery_charge)
+    {
+      charge_cnt++;
+    }
+    if (interfaces.battery_percentage)
+    {
+      percentage_cnt++;
+    }
+  }
+
+  RCLCPP_INFO(get_node()->get_logger(), "Battery  current_cnt: %f", current_cnt);
+
+  RCLCPP_INFO(get_node()->get_logger(), "Battery  voltage_cnt: %f", voltage_cnt);
 
   auto & battery_state_msg = battery_state_realtime_publisher_->msg_;
 

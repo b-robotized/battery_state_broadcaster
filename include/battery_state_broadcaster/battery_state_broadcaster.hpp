@@ -131,14 +131,14 @@ protected:
   battery_state_broadcaster::Params params_;
 
   const size_t MAX_LENGTH = 64;
-  float voltage_sum;
-  float current_sum;
-  float charge_sum;
-  float percentage_sum;
-  mutable float voltage_cnt = 0.0;
-  mutable float current_cnt = 0.0;
-  mutable float charge_cnt = 0.0;
-  mutable float percentage_cnt = 0.0;
+  float voltage_sum = 0.0;
+  float current_sum = 0.0;
+  float charge_sum = 0.0;
+  float percentage_sum = 0.0;
+  float voltage_cnt = 0.0;
+  float current_cnt = 0.0;
+  float charge_cnt = 0.0;
+  float percentage_cnt = 0.0;
 
   std::vector<std::string> state_joints_;
 
