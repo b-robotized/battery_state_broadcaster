@@ -188,10 +188,6 @@ controller_interface::CallbackReturn BatteryStateBroadcaster::on_activate(
     }
   }
 
-  RCLCPP_INFO(get_node()->get_logger(), "Battery  current_cnt: %f", current_cnt);
-
-  RCLCPP_INFO(get_node()->get_logger(), "Battery  voltage_cnt: %f", voltage_cnt);
-
   auto & battery_state_msg = battery_state_realtime_publisher_->msg_;
 
   battery_state_msg.voltage = kUninitializedValue;
