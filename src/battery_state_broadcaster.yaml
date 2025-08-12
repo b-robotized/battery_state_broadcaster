@@ -1,4 +1,4 @@
-# Copyright (c) 20224 Stogl Robotics Consulting UG (haftungsbeschränkt)
+# Copyright (c) 2024 Stogl Robotics Consulting UG (haftungsbeschränkt)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@
 battery_state_broadcaster:
   state_joints: {
     type: string_array,
-    default_value: [],
-    description: "Specifies joints for reading states. This parameter is only relevant when state joints are different then command joint, i.e., when a following controller is used.",
+    description: "List of joints from which battery state interfaces will be read.",
     read_only: true,
     validation: {
       unique<>: null,
+      size_gt<>: [0]
     }
   }
   interfaces:
@@ -32,68 +32,86 @@ battery_state_broadcaster:
       battery_voltage: {
         type: bool,
         default_value: false,
-        description: "battery_voltage"
+        description: "Whether to read battery voltage [V] from this joint's state interface (If unmeasured NaN)."
+      }
+      battery_temperature: {
+        type: bool,
+        default_value: false,
+        description: "Whether to read battery temperature [°C] from this joint's state interface (If unmeasured NaN)."
       }
       battery_current: {
         type: bool,
         default_value: false,
-        description: "battery_current"
+        description: "Whether to read battery current [A] from this joint's state interface (If unmeasured NaN)."
       }
       battery_charge: {
         type: bool,
         default_value: false,
-        description: "battery_charge"
+        description: "Whether to read battery charge [Ah] from this joint's state interface (If unmeasured NaN)."
       }
       battery_percentage: {
         type: bool,
         default_value: false,
-        description: "battery_percentage"
+        description: "Whether to read charge level [%] (0.0 to 1.0) from this joint's state interface. If unmeasured, linear percentage is calculated using min and max voltage parameters (if provided), otherwise NaN."
       }
       battery_power_supply_status: {
         type: bool,
         default_value: false,
-        description: "battery_power_supply_status"
+        description: "Whether to read power supply status (e.g., Charging, Full) from this joint's state interface. If unmeasured, status is set to unknown."
       }
       battery_power_supply_health: {
         type: bool,
         default_value: false,
-        description: "battery_power_supply_health"
+        description: "Whether to read power supply health (e.g., Good, Overheat) from this joint's state interface. If unmeasured, health is set to unknown."
       }
       battery_present: {
         type: bool,
         default_value: false,
-        description: "battery_present"
+        description: "Whether to read battery presence status (true if battery is present) from this joint's state interface. If unmeasured, the presence will be set to true if any other state interfaces from this joint are available."
       }
-  capacity: {
-    type: double,
-    default_value: 0.0,
-    description: "(optional) Specifies battery capacity in Ah. If not specified, the capacity is not published.",
-    read_only: true,
-  }
-  design_capacity: {
-    type: double,
-    default_value: 0.0,
-    description: "(optional) Specifies battery design capacity in Ah. If not specified, the design capacity is not published.",
-    read_only: true,
-  }
-  power_supply_technology: {
-    type: int,
-    default_value: 1,
-    description: "(optional) Specifies battery power supply technology. If not specified, the power supply technology is not published.",
-    read_only: true,
-    validation: {
-      bounds<>: [0, 6]
+  __map_state_joints:
+    minimum_voltage: {
+      type: double,
+      default_value: .nan,
+      description: "Minimum battery voltage (used to calculate percentage).",
+      read_only: true,
     }
-  }
-  location: {
-    type: string,
-    default_value: "dummy_location",
-    description: "Specifies battery location in combined battery state message.",
-    read_only: true,
-  }
-  serial_number: {
-    type: string,
-    default_value: "dummy_serial_number",
-    description: "(optional) Specifies battery serial number. If not specified, the serial number is not published.",
-    read_only: true,
-  }
+    maximum_voltage: {
+      type: double,
+      default_value: .nan,
+      description: "Maximum battery voltage (used to calculate percentage).",
+      read_only: true,
+    }
+    capacity: {
+      type: double,
+      default_value: .nan,
+      description: "Last known full battery capacity [Ah] (If unmeasured NaN).",
+      read_only: true,
+    }
+    design_capacity: {
+      type: double,
+      default_value: .nan,
+      description: "Design capacity of the battery [Ah] (If unmeasured NaN).",
+      read_only: true,
+    }
+    power_supply_technology: {
+      type: int,
+      default_value: 0,
+      description: "Battery chemistry type as an enum. If unmeasured, the technology is set to unknown.",
+      read_only: true,
+      validation: {
+        bounds<>: [0, 8]
+      }
+    }
+    location: {
+      type: string,
+      default_value: "",
+      description: "Physical location of the battery (e.g., slot number or plug label).",
+      read_only: true,
+    }
+    serial_number: {
+      type: string,
+      default_value: "",
+      description: "Serial number of the battery.",
+      read_only: true,
+    }
