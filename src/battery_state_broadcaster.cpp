@@ -168,40 +168,40 @@ BatteryStateBroadcaster::state_interface_configuration() const
   state_interfaces_config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
 
   state_interfaces_config.names.reserve(state_joints_.size() * 7);
-  for (size_t i = 0; i < state_joints_.size(); ++i)
+  for (const auto & joint : state_joints_)
   {
-    const auto & interfaces = params_.interfaces.state_joints_map.at(params_.state_joints.at(i));
+    const auto & interfaces = params_.interfaces.state_joints_map.at(joint);
     if (interfaces.battery_voltage)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_voltage");
+      state_interfaces_config.names.push_back(joint + "/battery_voltage");
     }
     if (interfaces.battery_temperature)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_temperature");
+      state_interfaces_config.names.push_back(joint + "/battery_temperature");
     }
     if (interfaces.battery_current)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_current");
+      state_interfaces_config.names.push_back(joint + "/battery_current");
     }
     if (interfaces.battery_charge)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_charge");
+      state_interfaces_config.names.push_back(joint + "/battery_charge");
     }
     if (interfaces.battery_percentage)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_percentage");
+      state_interfaces_config.names.push_back(joint + "/battery_percentage");
     }
     if (interfaces.battery_power_supply_status)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_power_supply_status");
+      state_interfaces_config.names.push_back(joint + "/battery_power_supply_status");
     }
     if (interfaces.battery_power_supply_health)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_power_supply_health");
+      state_interfaces_config.names.push_back(joint + "/battery_power_supply_health");
     }
     if (interfaces.battery_present)
     {
-      state_interfaces_config.names.push_back(state_joints_[i] + "/battery_present");
+      state_interfaces_config.names.push_back(joint + "/battery_present");
     }
   }
 
