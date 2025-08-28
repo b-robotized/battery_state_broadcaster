@@ -29,11 +29,6 @@ battery_state_broadcaster:
   }
   interfaces:
     __map_state_joints:
-      battery_voltage: {
-        type: bool,
-        default_value: false,
-        description: "Whether to read battery voltage [V] from this joint's state interface (If unmeasured NaN)."
-      }
       battery_temperature: {
         type: bool,
         default_value: false,

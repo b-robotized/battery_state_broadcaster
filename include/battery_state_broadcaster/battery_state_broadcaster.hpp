@@ -21,11 +21,11 @@
 #ifndef BATTERY_STATE_BROADCASTER__BATTERY_STATE_BROADCASTER_HPP_
 #define BATTERY_STATE_BROADCASTER__BATTERY_STATE_BROADCASTER_HPP_
 
+#include <cmath>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <cmath>
 
 #include "controller_interface/controller_interface.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
@@ -33,9 +33,9 @@
 #include "realtime_tools/realtime_buffer.hpp"
 #include "realtime_tools/realtime_publisher.hpp"
 
+#include <battery_state_broadcaster/battery_state_broadcaster_parameters.hpp>
 #include "control_msgs/msg/battery_states.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
-#include <battery_state_broadcaster/battery_state_broadcaster_parameters.hpp>
 
 namespace battery_state_broadcaster
 {
@@ -114,20 +114,20 @@ protected:
     raw_battery_states_realtime_publisher_;
   struct BatteryInterfaceSums
   {
-      float voltage_sum = 0.0f;
-      float temperature_sum = 0.0f;
-      float current_sum = 0.0f;
-      float charge_sum = 0.0f;
-      float percentage_sum = 0.0f;
+    float voltage_sum = 0.0f;
+    float temperature_sum = 0.0f;
+    float current_sum = 0.0f;
+    float charge_sum = 0.0f;
+    float percentage_sum = 0.0f;
+    float capacity_sum = 0.0f;
+    float design_capacity_sum = 0.0f;
   };
 
   struct BatteryInterfaceCounts
   {
-      float voltage_cnt = 0.0f;
-      float temperature_cnt = 0.0f;
-      float current_cnt = 0.0f;
-      float charge_cnt = 0.0f;
-      float percentage_cnt = 0.0f;
+    float temperature_cnt = 0.0f;
+    float current_cnt = 0.0f;
+    float percentage_cnt = 0.0f;
   };
 
   BatteryInterfaceSums sums_;
@@ -136,7 +136,6 @@ protected:
   std::vector<bool> battery_presence_;
 
 private:
-
 };
 
 }  // namespace battery_state_broadcaster
