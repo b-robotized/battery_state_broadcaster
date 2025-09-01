@@ -332,7 +332,7 @@ controller_interface::return_type BatteryStateBroadcaster::update(
         if (!(std::isnan(voltage) || std::isnan(min_volt) || std::isnan(max_volt)))
         {
           raw_battery_states_msg.battery_states[i].percentage =
-            static_cast<float>((voltage - min_volt) / (max_volt - min_volt));
+            static_cast<float>((voltage - min_volt) * 100.0 / (max_volt - min_volt));
           sums_.percentage_sum += raw_battery_states_msg.battery_states[i].percentage;
         }
       }
