@@ -21,6 +21,7 @@
 #ifndef BATTERY_STATE_BROADCASTER__BATTERY_STATE_BROADCASTER_HPP_
 #define BATTERY_STATE_BROADCASTER__BATTERY_STATE_BROADCASTER_HPP_
 
+#include <cmath>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -29,10 +30,10 @@
 #include "controller_interface/controller_interface.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
-#include "realtime_tools/realtime_buffer.h"
-#include "realtime_tools/realtime_publisher.h"
+#include "realtime_tools/realtime_buffer.hpp"
+#include "realtime_tools/realtime_publisher.hpp"
 
-#include "battery_state_broadcaster_parameters.hpp"
+#include <battery_state_broadcaster/battery_state_broadcaster_parameters.hpp>
 #include "control_msgs/msg/battery_states.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
 
@@ -43,37 +44,6 @@ namespace battery_state_broadcaster
 
 // // name constants for command interfaces
 // static constexpr size_t CMD_MY_ITFS = 0;
-
-enum class power_supply_status : std::uint8_t
-{
-  POWER_SUPPLY_STATUS_UNKNOWN = 0,
-  POWER_SUPPLY_STATUS_CHARGING = 1,
-  POWER_SUPPLY_STATUS_DISCHARGING = 2,
-  POWER_SUPPLY_STATUS_NOT_CHARGING = 3,
-  POWER_SUPPLY_STATUS_FULL = 4
-};
-enum class power_supply_health : std::uint8_t
-{
-  POWER_SUPPLY_HEALTH_UNKNOWN = 0,
-  POWER_SUPPLY_HEALTH_GOOD = 1,
-  POWER_SUPPLY_HEALTH_OVERHEAT = 2,
-  POWER_SUPPLY_HEALTH_DEAD = 3,
-  POWER_SUPPLY_HEALTH_OVERVOLTAGE = 4,
-  POWER_SUPPLY_HEALTH_UNSPEC_FAILURE = 5,
-  POWER_SUPPLY_HEALTH_COLD = 6,
-  POWER_SUPPLY_HEALTH_WATCHDOG_TIMER_EXPIRE = 7,
-  POWER_SUPPLY_HEALTH_SAFETY_TIMER_EXPIRE = 8
-};
-enum class power_supply_technology : std::uint8_t
-{
-  POWER_SUPPLY_TECHNOLOGY_UNKNOWN = 0,
-  POWER_SUPPLY_TECHNOLOGY_NIMH = 1,
-  POWER_SUPPLY_TECHNOLOGY_LION = 2,
-  POWER_SUPPLY_TECHNOLOGY_LIPO = 3,
-  POWER_SUPPLY_TECHNOLOGY_LIFE = 4,
-  POWER_SUPPLY_TECHNOLOGY_NICD = 5,
-  POWER_SUPPLY_TECHNOLOGY_LIMN = 6
-};
 
 /**
  * \brief Battery State Broadcaster for all or some state in a ros2_control system.
@@ -126,19 +96,12 @@ public:
   controller_interface::return_type update(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
+  float get_or_nan(int interface_cnt);
+  char get_or_unknown(int interface_cnt);
+
 protected:
   std::shared_ptr<battery_state_broadcaster::ParamListener> param_listener_;
   battery_state_broadcaster::Params params_;
-
-  const size_t MAX_LENGTH = 64;
-  float voltage_sum = 0.0;
-  float current_sum = 0.0;
-  float charge_sum = 0.0;
-  float percentage_sum = 0.0;
-  float voltage_cnt = 0.0;
-  float current_cnt = 0.0;
-  float charge_cnt = 0.0;
-  float percentage_cnt = 0.0;
 
   std::vector<std::string> state_joints_;
 
@@ -149,8 +112,28 @@ protected:
     battery_state_realtime_publisher_;
   std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::BatteryStates>>
     raw_battery_states_realtime_publisher_;
+  struct BatteryInterfaceSums
+  {
+    float voltage_sum = 0.0f;
+    float temperature_sum = 0.0f;
+    float current_sum = 0.0f;
+    float charge_sum = 0.0f;
+    float percentage_sum = 0.0f;
+    float capacity_sum = 0.0f;
+    float design_capacity_sum = 0.0f;
+  };
 
-  std::vector<sensor_msgs::msg::BatteryState> battery_states_data_;
+  struct BatteryInterfaceCounts
+  {
+    float temperature_cnt = 0.0f;
+    float current_cnt = 0.0f;
+    float percentage_cnt = 0.0f;
+  };
+
+  BatteryInterfaceSums sums_;
+  BatteryInterfaceCounts counts_;
+
+  std::vector<bool> battery_presence_;
 
 private:
 };
