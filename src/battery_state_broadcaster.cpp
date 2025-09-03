@@ -126,10 +126,11 @@ controller_interface::CallbackReturn BatteryStateBroadcaster::on_configure(
       auto max_volt = battery_properties.maximum_voltage;
       if ((!std::isnan(min_volt)) && (!std::isnan(max_volt)))
       {
-        if (min_volt == max_volt)
+        if (min_volt >= max_volt)
         {
           RCLCPP_ERROR(
-            get_node()->get_logger(), "Minimum and maximum battery voltage levels can't be equal.");
+            get_node()->get_logger(),
+            "Maximum battery voltage level must be greater than minimum voltage level.");
           return controller_interface::CallbackReturn::ERROR;
         }
         counts_.percentage_cnt++;

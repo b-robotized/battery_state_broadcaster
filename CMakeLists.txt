@@ -65,6 +65,9 @@ install(
   LIBRARY DESTINATION lib
 )
 
+  add_definitions(-DTEST_FILES_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}/test")
+
+
 ament_export_targets(export_battery_state_broadcaster HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()
