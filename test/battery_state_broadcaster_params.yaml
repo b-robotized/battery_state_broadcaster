@@ -38,7 +38,7 @@ test_battery_state_broadcaster:
         battery_percentage: true
         battery_power_supply_status: true
         battery_power_supply_health: true
-        battery_present: true
+        battery_present: false
     left_wheel:
       minimum_voltage: 0.0
       maximum_voltage: 10.0
