@@ -4,18 +4,19 @@
 
 Battery State Broadcaster
 --------------------------------
-The *Battery State Broadcaster* is a ros2 controller that publishes battery status information as
+The *Battery State Broadcaster* is a ROS 2 controller that publishes battery status information as
 ``sensor_msgs/msg/BatteryState`` messages.
 
-It is designed to read battery-related state interfaces from one or more joints and convert them into
-a standard ROS 2 battery message for monitoring, logging, and higher-level decision-making.
+It reads battery-related state interfaces from one or more joints and exposes them in a standard ROS 2 message format.
+This allows easy integration with monitoring tools, logging systems, and higher-level decision-making nodes.
 
 Interfaces
 ====================
 The broadcaster can read the following state interfaces from each configured joint:
 
 - ``battery_voltage`` *(mandatory)*
-  Battery voltage [V]. Always required.
+  Battery voltage [V].
+  This interface is **always required** for the controller to function.
 
 - ``battery_temperature`` *(optional)*
   Battery temperature [°C].
@@ -28,7 +29,7 @@ The broadcaster can read the following state interfaces from each configured joi
 
 - ``battery_percentage`` *(optional)*
   Charge level [%] (0.0–100.0).
-  If not measured, estimated using ``minimum_voltage`` and ``maximum_voltage`` if provided.
+  If not provided, it is estimated using ``minimum_voltage`` and ``maximum_voltage`` if available.
 
 - ``battery_power_supply_status`` *(optional)*
   Power supply status (e.g., Charging, Full, Not Charging).
@@ -39,29 +40,29 @@ The broadcaster can read the following state interfaces from each configured joi
   Defaults to *Unknown* if not provided.
 
 - ``battery_present`` *(optional)*
-  Presence flag.
-  Defaults to *true* if voltage value from this joint is available.
+  Indicates whether the battery is present.
+  Defaults to *true* if a valid voltage is reported from this joint.
 
 Metadata interfaces (read-only, optional):
-- ``minimum_voltage`` / ``maximum_voltage`` – used to estimate percentage.
-- ``capacity`` / ``design_capacity`` – reported as is.
-- ``power_supply_technology`` – chemistry type enum.
-- ``location`` – free-form string describing location.
-- ``serial_number`` – serial number string.
+
+- ``minimum_voltage`` / ``maximum_voltage`` – used for percentage estimation.
+- ``capacity`` / ``design_capacity`` – reported as provided.
+- ``power_supply_technology`` – chemistry type enum (e.g., Li-ion).
+- ``location`` – free-form string describing physical location.
+- ``serial_number`` – battery serial number.
 
 Published Topics
 ================
 The broadcaster publishes two topics:
 
 - ``~/raw_battery_states`` (``control_msgs/msg/BatteryStates``)
-  Publishes **one message per configured joint**, containing the raw values read directly from each joint’s interfaces.
-  This is useful when you need detailed, per-battery diagnostics.
+  Publishes **per-joint battery state messages**, containing the raw values for each configured joint.
 
 - ``~/battery_state`` (``sensor_msgs/msg/BatteryState``)
-  Publishes a **single aggregated message** representing the combined battery state across all joints.
-  This is useful for higher-level decision making (e.g., robot as a whole has 65% battery).
+  Publishes a **single aggregated battery message** representing the combined status across all joints.
 
-Aggregation rules:
+Aggregation Rules
+=================
 
 +-----------------------------+----------------------------------------------+
 | Field                       | Aggregation rule                             |
@@ -74,33 +75,33 @@ Aggregation rules:
 +-----------------------------+----------------------------------------------+
 | ``charge``                  | Sum across all joints                        |
 +-----------------------------+----------------------------------------------+
-| ``percentage``              | Mean across joints reporting/calculating     |
+| ``percentage``              | Mean across joints with reported/calculated  |
 |                             | percentage                                   |
 +-----------------------------+----------------------------------------------+
-| ``power_supply_status``     | Combined into a representative status: the   |
-|                             | (higher enum value is taken).                |
+| ``power_supply_status``     | Combined using highest reported enum value   |
 +-----------------------------+----------------------------------------------+
-| ``power_supply_health``     | Combined into a representative health        |
-|                             | (higher enum value is taken).                |
+| ``power_supply_health``     | Combined using highest reported enum value   |
++-----------------------------+----------------------------------------------+
+| ``present``                 | True if any joint reports presence           |
 +-----------------------------+----------------------------------------------+
 
 Parameters
 ^^^^^^^^^^^
 This controller uses the
 `generate_parameter_library <https://github.com/PickNikRobotics/generate_parameter_library>`_
-to handle its parameters.
+to manage parameters.
 The parameter `definition file <https://github.com/ros-controls/ros2_controllers/blob/{REPOS_FILE_BRANCH}/battery_state_broadcaster/src/battery_state_broadcaster_parameters.yaml>`_
-contains descriptions for all the parameters used by the controller.
+contains the full list and descriptions.
 
 List of parameters
 =========================
 .. generate_parameter_library_details:: ../src/battery_state_broadcaster_parameters.yaml
 
-An example parameter file
+Example Parameter File
 =========================
 
-An example parameter file for this controller can be found in
-`the test directory <https://github.com/ros-controls/ros2_controllers/blob/{REPOS_FILE_BRANCH}/battery_state_broadcaster/test/battery_state_broadcaster_params.yaml>`_:
+An example parameter file for this controller is available in the
+`test directory <https://github.com/ros-controls/ros2_controllers/blob/{REPOS_FILE_BRANCH}/battery_state_broadcaster/test/battery_state_broadcaster_params.yaml>`_:
 
 .. literalinclude:: ../test/battery_state_broadcaster_params.yaml
    :language: yaml
