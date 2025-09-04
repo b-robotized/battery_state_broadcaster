@@ -1,5 +1,4 @@
-// Copyright (c) 2025, b-robotized
-// Copyright (c) 2025, Stogl Robotics Consulting UG (haftungsbeschränkt) (template)
+// Copyright (c) 2025, b-robotized GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-//
-// Source of this file are templates in
-// [RosTeamWorkspace](https://github.com/StoglRobotics/ros_team_workspace) repository.
-//
 
 #include "battery_state_broadcaster/battery_state_broadcaster.hpp"
 
@@ -126,10 +120,11 @@ controller_interface::CallbackReturn BatteryStateBroadcaster::on_configure(
       auto max_volt = battery_properties.maximum_voltage;
       if ((!std::isnan(min_volt)) && (!std::isnan(max_volt)))
       {
-        if (min_volt == max_volt)
+        if (min_volt >= max_volt)
         {
           RCLCPP_ERROR(
-            get_node()->get_logger(), "Minimum and maximum battery voltage levels can't be equal.");
+            get_node()->get_logger(),
+            "Maximum battery voltage level must be greater than minimum voltage level.");
           return controller_interface::CallbackReturn::ERROR;
         }
         counts_.percentage_cnt++;
@@ -329,12 +324,10 @@ controller_interface::return_type BatteryStateBroadcaster::update(
         auto min_volt = params_.state_joints_map.at(params_.state_joints.at(i)).minimum_voltage;
         auto max_volt = params_.state_joints_map.at(params_.state_joints.at(i)).maximum_voltage;
         float voltage = raw_battery_states_msg.battery_states[i].voltage;
-        if (!(std::isnan(voltage) || std::isnan(min_volt) || std::isnan(max_volt)))
-        {
-          raw_battery_states_msg.battery_states[i].percentage =
-            static_cast<float>((voltage - min_volt) * 100.0 / (max_volt - min_volt));
-          sums_.percentage_sum += raw_battery_states_msg.battery_states[i].percentage;
-        }
+
+        raw_battery_states_msg.battery_states[i].percentage =
+          static_cast<float>((voltage - min_volt) * 100.0 / (max_volt - min_volt));
+        sums_.percentage_sum += raw_battery_states_msg.battery_states[i].percentage;
       }
       if (interfaces.battery_power_supply_status)
       {

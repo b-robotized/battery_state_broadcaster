@@ -1,5 +1,4 @@
-// Copyright (c) 2025, b-robotized
-// Copyright (c) 2025, Stogl Robotics Consulting UG (haftungsbeschränkt) (template)
+// Copyright (c) 2025, b-robotized GmbH
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//
-// Source of this file are templates in
-// [RosTeamWorkspace](https://github.com/StoglRobotics/ros_team_workspace) repository.
-//
-
 #include <gmock/gmock.h>
 #include <memory>
 
@@ -28,18 +22,29 @@
 #include "rclcpp/utilities.hpp"
 #include "ros2_control_test_assets/descriptions.hpp"
 
-TEST(TestLoadDummyClassName, load_controller)
+TEST(TestLoadBatteryStateBroadcaster, load_controller)
 {
-  rclcpp::init(0, nullptr);
-
   std::shared_ptr<rclcpp::Executor> executor =
     std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
   controller_manager::ControllerManager cm(
     executor, ros2_control_test_assets::minimal_robot_urdf, true, "test_controller_manager");
+  const std::string test_file_path =
+    std::string(TEST_FILES_DIRECTORY) + "/battery_state_broadcaster_params.yaml";
 
-  ASSERT_NO_THROW(
-    cm.load_controller("test_dummy_package_namespace", "dummy_package_namespace/DummyClassName"));
+  cm.set_parameter({"test_battery_state_broadcaster.params_file", test_file_path});
+  cm.set_parameter(
+    {"test_battery_state_broadcaster.type", "battery_state_broadcaster/BatteryStateBroadcaster"});
 
+  ASSERT_NO_THROW(cm.load_controller(
+    "test_battery_state_broadcaster", "battery_state_broadcaster/BatteryStateBroadcaster"));
+}
+
+int main(int argc, char ** argv)
+{
+  ::testing::InitGoogleMock(&argc, argv);
+  rclcpp::init(argc, argv);
+  int result = RUN_ALL_TESTS();
   rclcpp::shutdown();
+  return result;
 }
