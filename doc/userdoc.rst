@@ -4,7 +4,7 @@
 
 Battery State Broadcaster
 --------------------------------
-The *Battery State Broadcaster* is a ROS 2 controller that publishes battery status information as ``sensor_msgs/msg/BatteryState`` messages.
+The *Battery State Broadcaster* publishes battery status information as ``sensor_msgs/msg/BatteryState`` messages.
 
 It reads battery-related state interfaces from one or more joints and exposes them in a standard ROS 2 message format. This allows easy integration with monitoring tools, logging systems, and higher-level decision-making nodes.
 
@@ -27,7 +27,7 @@ Published Topics
 
 The broadcaster publishes two topics:
 
-- ``~/raw_battery_states`` (``control_msgs/msg/BatteryStates``)
+- ``~/raw_battery_states`` (``control_msgs/msg/BatteryStateArray``)
   Publishes **per-joint battery state messages**, containing the raw values for each configured joint.
 
 - ``~/battery_state`` (``sensor_msgs/msg/BatteryState``)
@@ -86,3 +86,40 @@ An example parameter file for this controller is available in the `test director
 
 .. literalinclude:: ../test/battery_state_broadcaster_params.yaml
    :language: yaml
+
+Migration for ``ipa320/ros_battery_monitoring`` users
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you were previously using the ``battery_state_broadcaster`` from the ``ipa320/ros_battery_monitoring package``, you can switch directly to this package. The configuration style using ``sensor_name`` is still supported for backward compatibility, but it may be removed in a future release.
+
+To adapt your setup to the new ``battery_state_broadcaster`` configuration:
+
+1. Update your hardware interface name from ``voltage`` → ``battery_voltage``.
+
+2. Convert your controller parameters from
+
+  .. code-block:: yaml
+
+    battery_state_broadcaster:
+      ros__parameters:
+        sensor_name: "battery_state"
+        design_capacity: 100.0
+        # https://github.com/ros2/common_interfaces/blob/rolling/sensor_msgs/msg/BatteryState.msg
+        power_supply_technology: 2
+
+  to:
+
+  .. code-block:: yaml
+
+    battery_state_broadcaster:
+      ros__parameters:
+        state_joints: ["battery_state"]
+        battery_state:
+          design_capacity: 100.0
+          power_supply_technology: 2
+
+**Notes**:
+
+- Parameters must provide **either** sensor_name **or** state_joints.
+- If both are empty → the broadcaster will fail to configure.
+- If both are set → the broadcaster will throw an error.

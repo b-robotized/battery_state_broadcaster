@@ -1,4 +1,4 @@
-// Copyright (c) 2025, b-robotized GmbH
+// Copyright (c) 2025, b-robotized Group
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 #define BATTERY_STATE_BROADCASTER__BATTERY_STATE_BROADCASTER_HPP_
 
 #include <cmath>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -28,29 +29,24 @@
 #include "realtime_tools/realtime_publisher.hpp"
 
 #include <battery_state_broadcaster/battery_state_broadcaster_parameters.hpp>
-#include "control_msgs/msg/battery_states.hpp"
+#include "control_msgs/msg/battery_state_array.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
 
 namespace battery_state_broadcaster
 {
-// // name constants for state interfaces
-// static constexpr size_t STATE_MY_ITFS = 0;
-
-// // name constants for command interfaces
-// static constexpr size_t CMD_MY_ITFS = 0;
-
 /**
  * \brief Battery State Broadcaster for all or some state in a ros2_control system.
  *
  * BatteryStateBroadcaster publishes state interfaces from ros2_control as ROS messages.
- * The following state interfaces are published:
- *    <state_joint>/voltage
- *    <state_joint>/current
- *    <state_joint>/charge
- *    <state_joint>/percentage
- *    <state_joint>/power_supply_status
- *    <state_joint>/power_supply_health
- *    <state_joint>/present
+ * The following state interfaces can be published:
+ *    <state_joint>/battery_voltage (Mandatory)
+ *    <state_joint>/battery_temperature
+ *    <state_joint>/battery_current
+ *    <state_joint>/battery_charge
+ *    <state_joint>/battery_percentage
+ *    <state_joint>/battery_power_supply_status
+ *    <state_joint>/battery_power_supply_health
+ *    <state_joint>/battery_present
  *
  * \param state_joints of the batteries to publish.
  * \param capacity of the batteries to publish.
@@ -63,8 +59,8 @@ namespace battery_state_broadcaster
  *
  * - \b battery_state (sensor_msgs::msg::BatteryState): battery state of the combined battery
  * joints.
- * - \b raw_battery_states (battery_state_broadcaster::msg::BatteryStates): battery states of the
- * individual battery joints.
+ * - \b raw_battery_states (control_msgs::msg::BatteryStateArray): battery states of
+ * the individual battery joints.
  *
  */
 class BatteryStateBroadcaster : public controller_interface::ControllerInterface
@@ -90,21 +86,14 @@ public:
   controller_interface::return_type update(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
-  float get_or_nan(int interface_cnt);
-  char get_or_unknown(int interface_cnt);
-
 protected:
-  std::shared_ptr<battery_state_broadcaster::ParamListener> param_listener_;
   battery_state_broadcaster::Params params_;
 
   std::vector<std::string> state_joints_;
 
-  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::BatteryState>> battery_state_publisher_;
-  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::BatteryStates>>
-    raw_battery_states_publisher_;
   std::shared_ptr<realtime_tools::RealtimePublisher<sensor_msgs::msg::BatteryState>>
     battery_state_realtime_publisher_;
-  std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::BatteryStates>>
+  std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::BatteryStateArray>>
     raw_battery_states_realtime_publisher_;
   struct BatteryInterfaceSums
   {
@@ -127,9 +116,15 @@ protected:
   BatteryInterfaceSums sums_;
   BatteryInterfaceCounts counts_;
 
-  std::vector<bool> battery_presence_;
-
 private:
+  std::shared_ptr<battery_state_broadcaster::ParamListener> param_listener_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::BatteryState>> battery_state_publisher_;
+  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::BatteryStateArray>>
+    raw_battery_states_publisher_;
+  sensor_msgs::msg::BatteryState battery_state_msg;
+  control_msgs::msg::BatteryStateArray raw_battery_states_msg;
+
+  std::vector<bool> battery_presence_;
 };
 
 }  // namespace battery_state_broadcaster
